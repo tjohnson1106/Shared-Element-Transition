@@ -34,16 +34,6 @@ class Main extends Component {
     this.oldPosition = {};
     this.position = new Animated.ValueXY();
     this.dimension = new Animated.ValueXY();
-
-    this.position.setValue({
-      x: pageX,
-      y: pageY
-    });
-
-    this.position.setValue({
-      x: width,
-      y: height
-    });
   }
 
   openImage = index => {
@@ -53,11 +43,67 @@ class Main extends Component {
         this.oldPosition.y = pageY;
         this.oldPosition.width = width;
         this.oldPosition.height = height;
+
+        this.position.setValue({
+          x: pageX,
+          y: pageY
+        });
+
+        this.position.setValue({
+          x: pageX,
+          y: pageY
+        });
+
+        this.dimensions.setValue({
+          x: width,
+          y: height
+        });
+        this.dimensions.setValue({
+          x: width,
+          y: height
+        });
+
+        this.setState(
+          {
+            activeImage: images[index]
+          },
+          () => {
+            this.viewImage.measure(
+              (dx, dy, dWidth, dHeight, dPageX, dPageY) => {
+                Animated.parallel([
+                  Animated.timing(this.position.x, {
+                    toValue: dPageX,
+                    duration: 300
+                  }),
+                  Animated.timing(this.position.y, {
+                    toValue: dPageY,
+                    duration: 300
+                  }),
+                  Animated.timing(this.dimensions.x, {
+                    toValue: dWidth,
+                    duration: 300
+                  }),
+                  Animated.timing(this.position.y, {
+                    toValue: dHeight,
+                    duration: 300
+                  })
+                ]).start();
+              }
+            );
+          }
+        );
       }
     );
   };
 
   render() {
+    const activeImageStyle = {
+      width: this.dimension.x,
+      height: this.dimension.y,
+      left: this.dimension.x,
+      top: this.dimension.y
+    };
+
     return (
       <SafeAreaView style={styles.safe}>
         <ScrollView style={styles.scroll}>
@@ -71,7 +117,7 @@ class Main extends Component {
                   <Image
                     ref={image => (this.allImages[index] = image)}
                     source={image.src}
-                    style={styles.imgStyle}
+                    style={[styles.imgStyle, activeImageStyle]}
                   />
                 </Animated.View>
               </TouchableWithoutFeedback>
@@ -81,7 +127,24 @@ class Main extends Component {
         <View
           style={StyleSheet.absoluteFill}
           pointerEvents={this.state.activeImage ? "auto" : "none"}
-        />
+        >
+          <View
+            style={styles.activeWrapper}
+            ref={view => (this.viewImage = view)}
+          >
+            <Animated.Image
+              source={
+                this.state.activeImage
+                  ? this.state.activeImage.src
+                  : null
+              }
+              style={styles._animateImg}
+            >
+              {}
+            </Animated.Image>
+          </View>
+          <View style={styles.active}>{}</View>
+        </View>
       </SafeAreaView>
     );
   }
@@ -105,6 +168,20 @@ const styles = StyleSheet.create({
     height: null,
     resizeMode: "cover",
     borderRadius: 20
+  },
+  activeWrapper: {
+    flex: 2,
+    borderWidth: 1
+  },
+  active: {
+    flex: 1
+  },
+  _animateImg: {
+    resizeMode: "cover",
+    top: 0,
+    left: 0,
+    height: null,
+    width: null
   }
 });
 
