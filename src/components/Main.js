@@ -117,7 +117,7 @@ class Main extends Component {
                   <Image
                     ref={image => (this.allImages[index] = image)}
                     source={image.src}
-                    style={[styles.imgStyle, activeImageStyle]}
+                    style={[styles.imgStyle, { activeImageStyle }]}
                   />
                 </Animated.View>
               </TouchableWithoutFeedback>
